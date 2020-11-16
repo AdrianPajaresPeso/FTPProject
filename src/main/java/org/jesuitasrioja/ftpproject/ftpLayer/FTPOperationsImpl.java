@@ -1,15 +1,10 @@
 package org.jesuitasrioja.ftpproject.ftpLayer;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -33,8 +28,6 @@ public class FTPOperationsImpl implements FTPOperations {
 		}
 	}
 
-	
-	
 	@Override
 	public String directorioDeTrabajo() {
 		String cadenaRetorno = "";
@@ -81,7 +74,7 @@ public class FTPOperationsImpl implements FTPOperations {
 
 			cl.setFileType(FTP.BINARY_FILE_TYPE);
 			File fileToUpload = new File(path);
-			
+
 			cl.storeFile(fileToUpload.getName(), new FileInputStream(fileToUpload));
 			System.out.println(cl.getReplyCode());
 
@@ -100,13 +93,12 @@ public class FTPOperationsImpl implements FTPOperations {
 	@Override
 	public Boolean bajarFichero(String file, String path) {
 		Boolean flag = false;
-		
+
 		try {
 			FTPClient cl = FTPUtils.getFTPConection();
-			
-			
+
 			cl.retrieveFile(file, new FileOutputStream(new File(path)));
-			
+
 			cl.disconnect();
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
@@ -115,13 +107,13 @@ public class FTPOperationsImpl implements FTPOperations {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		return null;
+
+		return flag;
 	}
 
 	@Override
 	public Boolean eliminarFichero(String file) {
+		boolean flag = false;
 		try {
 			FTPClient cl = FTPUtils.getFTPConection();
 			cl.deleteFile(file);
@@ -130,25 +122,35 @@ public class FTPOperationsImpl implements FTPOperations {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return flag;
 	}
 
 	@Override
 	public Boolean crearCarpeta(String nombreCarpeta) {
+		boolean flag = false;
 		try {
 			FTPClient cl = FTPUtils.getFTPConection();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		return null;
+
+		return flag;
 	}
 
 	@Override
 	public Boolean eliminarCarpeta(String nombreCarpeta) {
-		// TODO Auto-generated method stub
-		return null;
+		boolean flag = false;
+		try {
+			FTPClient cl = FTPUtils.getFTPConection();
+			cl.removeDirectory(nombreCarpeta);
+			cl.disconnect();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return flag;
 	}
 
 	@Override
@@ -159,7 +161,7 @@ public class FTPOperationsImpl implements FTPOperations {
 			cl = FTPUtils.getFTPConection();
 
 			FTPFile[] files = cl.listFiles(path);
-			
+
 			for (FTPFile ftpFile : files) {
 				listaFicheros.add(ftpFile);
 			}
@@ -167,7 +169,7 @@ public class FTPOperationsImpl implements FTPOperations {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return listaFicheros;
 	}
 
@@ -179,7 +181,7 @@ public class FTPOperationsImpl implements FTPOperations {
 			cl = FTPUtils.getFTPConection();
 
 			FTPFile[] files = cl.listDirectories(path);
-			
+
 			for (FTPFile ftpFile : files) {
 				listaDirectorios.add(ftpFile);
 			}
@@ -187,16 +189,17 @@ public class FTPOperationsImpl implements FTPOperations {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return listaDirectorios;
 	}
 
 	@Override
 	public void mostrarInformacionFile(FTPFile file) {
-		// TODO Auto-generated method stub
+
+		System.out.println(
+				"Nombre: " + file.getName() + ", Tamanio: " + file.getSize() + ", Tipo: " + file.getType()
+						+ ", Usuario: " + file.getUser() + ", Ultima modificacion: " + file.getTimestamp());
 
 	}
-
-	
 
 }
