@@ -12,13 +12,15 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.log4j.Logger;
-import org.jesuitasrioja.ftpproject.ftputils.FTPUtils;
 
 public class FTPOperationsImpl implements FTPOperations {
 
 	Logger logger = Logger.getLogger(FTPOperationsImpl.class);
 	private static Properties p = new Properties();
-
+	private FTPClient cl = new FTPClient();
+	
+	
+	
 	public FTPOperationsImpl() {
 		try {
 			p.load(new FileInputStream("src/main/java/credentials.properties"));
@@ -28,14 +30,32 @@ public class FTPOperationsImpl implements FTPOperations {
 		}
 	}
 
+	public void connectToFTPServer() {
+		try {
+			cl.connect(p.getProperty("direction"), 21);
+			cl.login(p.getProperty("user"), p.getProperty("pass"));
+			cl.enterLocalPassiveMode();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+	public void disconectFromFTPServer() {
+		try {
+			cl.disconnect();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	@Override
 	public String directorioDeTrabajo() {
-		String cadenaRetorno = "";
+		String cadenaRetorno = null;
 		try {
-			FTPClient fclient = FTPUtils.getFTPConection();
-
-			cadenaRetorno += fclient.printWorkingDirectory();
-			fclient.disconnect();
+			cadenaRetorno = cl.printWorkingDirectory();
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -50,10 +70,17 @@ public class FTPOperationsImpl implements FTPOperations {
 	public Boolean cambiarDirectorioDeTrabajo(String path) {
 		boolean flag = false;
 		try {
-			FTPClient fclient = FTPUtils.getFTPConection();
-			fclient.changeWorkingDirectory(path);
-			flag = true;
-			fclient.disconnect();
+			
+			cl.changeWorkingDirectory(path);
+			if(cl.getReplyCode() == 250) {
+				flag = true;
+				logger.info(cl.getReplyString());
+			}
+			
+			if(cl.getReplyCode() == 550) {
+				logger.error(cl.getReplyString());
+			}
+			
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,17 +95,18 @@ public class FTPOperationsImpl implements FTPOperations {
 	@Override
 	public Boolean subirFichero(String path) {
 		boolean flag = false;
-		FTPClient cl;
+		
 		try {
-			cl = FTPUtils.getFTPConection();
+			
 
 			cl.setFileType(FTP.BINARY_FILE_TYPE);
 			File fileToUpload = new File(path);
-
 			cl.storeFile(fileToUpload.getName(), new FileInputStream(fileToUpload));
-			System.out.println(cl.getReplyCode());
-
-			cl.disconnect();
+			if(cl.getReplyCode()==226) {
+				flag = true;
+				logger.info(cl.getReplyString());
+			}
+			
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -95,11 +123,14 @@ public class FTPOperationsImpl implements FTPOperations {
 		Boolean flag = false;
 
 		try {
-			FTPClient cl = FTPUtils.getFTPConection();
+			
 
 			cl.retrieveFile(file, new FileOutputStream(new File(path)));
-
-			cl.disconnect();
+			if(cl.getReplyCode() == 226) {
+				flag = true;
+				logger.info(cl.getReplyString());
+			}
+			
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -115,9 +146,9 @@ public class FTPOperationsImpl implements FTPOperations {
 	public Boolean eliminarFichero(String file) {
 		boolean flag = false;
 		try {
-			FTPClient cl = FTPUtils.getFTPConection();
+			
 			cl.deleteFile(file);
-			cl.disconnect();
+			flag = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -129,7 +160,11 @@ public class FTPOperationsImpl implements FTPOperations {
 	public Boolean crearCarpeta(String nombreCarpeta) {
 		boolean flag = false;
 		try {
-			FTPClient cl = FTPUtils.getFTPConection();
+			cl.makeDirectory(nombreCarpeta);
+			if(cl.getReplyCode() == 257) {
+				logger.info(cl.getReplyString());
+				flag = true;
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -142,9 +177,13 @@ public class FTPOperationsImpl implements FTPOperations {
 	public Boolean eliminarCarpeta(String nombreCarpeta) {
 		boolean flag = false;
 		try {
-			FTPClient cl = FTPUtils.getFTPConection();
+			
 			cl.removeDirectory(nombreCarpeta);
-			cl.disconnect();
+			if(cl.getReplyCode() == 250) {
+				flag = true;
+				logger.info(cl.getReplyString());
+			}
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -156,9 +195,9 @@ public class FTPOperationsImpl implements FTPOperations {
 	@Override
 	public List<FTPFile> listaFicherosCarpeta(String path) {
 		List<FTPFile> listaFicheros = null;
-		FTPClient cl;
+		
 		try {
-			cl = FTPUtils.getFTPConection();
+			
 
 			FTPFile[] files = cl.listFiles(path);
 
@@ -176,9 +215,9 @@ public class FTPOperationsImpl implements FTPOperations {
 	@Override
 	public List<FTPFile> listaDirectoriosCarpeta(String path) {
 		List<FTPFile> listaDirectorios = null;
-		FTPClient cl;
+		
 		try {
-			cl = FTPUtils.getFTPConection();
+		
 
 			FTPFile[] files = cl.listDirectories(path);
 
