@@ -74,10 +74,12 @@ public class FTPOperationsImpl implements FTPOperations {
 			cl.changeWorkingDirectory(path);
 			if(cl.getReplyCode() == 250) {
 				flag = true;
+				logger.info("Cambiando directorio de trabajo a "+path);
 				logger.info(cl.getReplyString());
 			}
 			
 			if(cl.getReplyCode() == 550) {
+				logger.info("Cambiando directorio de trabajo a "+path);
 				logger.error(cl.getReplyString());
 			}
 			
@@ -102,9 +104,12 @@ public class FTPOperationsImpl implements FTPOperations {
 			cl.setFileType(FTP.BINARY_FILE_TYPE);
 			File fileToUpload = new File(path);
 			cl.storeFile(fileToUpload.getName(), new FileInputStream(fileToUpload));
+			
 			if(cl.getReplyCode()==226) {
 				flag = true;
 				logger.info(cl.getReplyString());
+			}else {
+				logger.error(cl.getReplyString());
 			}
 			
 		} catch (SocketException e) {
@@ -112,7 +117,7 @@ public class FTPOperationsImpl implements FTPOperations {
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e);
 		}
 
 		return flag;
@@ -129,6 +134,8 @@ public class FTPOperationsImpl implements FTPOperations {
 			if(cl.getReplyCode() == 226) {
 				flag = true;
 				logger.info(cl.getReplyString());
+			}else {
+				logger.error(cl.getReplyString());
 			}
 			
 		} catch (SocketException e) {
@@ -148,7 +155,13 @@ public class FTPOperationsImpl implements FTPOperations {
 		try {
 			
 			cl.deleteFile(file);
-			flag = true;
+			System.out.println(cl.getReplyString());
+			if(cl.getReplyCode() == 250) {
+				flag = true;
+				logger.info(cl.getReplyString());
+			}else {
+				logger.error(cl.getReplyString());
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -164,6 +177,8 @@ public class FTPOperationsImpl implements FTPOperations {
 			if(cl.getReplyCode() == 257) {
 				logger.info(cl.getReplyString());
 				flag = true;
+			}else {
+				logger.error(cl.getReplyString());
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -182,6 +197,8 @@ public class FTPOperationsImpl implements FTPOperations {
 			if(cl.getReplyCode() == 250) {
 				flag = true;
 				logger.info(cl.getReplyString());
+			}else {
+				logger.error(cl.getReplyString());
 			}
 			
 		} catch (IOException e) {

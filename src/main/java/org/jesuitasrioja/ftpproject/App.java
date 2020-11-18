@@ -10,14 +10,27 @@ import org.jesuitasrioja.ftpproject.ftpLayer.FTPOperationsImpl;
  */
 public class App {
 	public static void main(String[] args) {
-		FTPOperations ftp = new FTPOperationsImpl();
+		
+		/**
+		 * Se está probando que salga por pantalla todos los logs puestos en el codigo
+		 * */
+		
+		FTPOperationsImpl ftp = new FTPOperationsImpl();
+		ftp.connectToFTPServer();
 		System.out.println(ftp.directorioDeTrabajo());
-		System.out.println(ftp.cambiarDirectorioDeTrabajo("apuntesPSP"));
-		System.out.println(ftp.subirFichero("IMAGE.jpg"));
-		System.out.println(ftp.bajarFichero("IMAGE.jpg", "bajado.jpg"));
-		System.out.println(ftp.crearCarpeta("AdrianPajaresPeso"));
-		System.out.println(ftp.eliminarCarpeta("AdrianPajaresPeso"));
-	
+		ftp.cambiarDirectorioDeTrabajo("apuntesPSP");
+		ftp.cambiarDirectorioDeTrabajo("apuntesPSP"); // suelta error
+		ftp.subirFichero("IMAGE.jpg");
+		ftp.subirFichero("IMAGEs.jpg"); // suelta error
+		ftp.bajarFichero("IMAGE.jpg", "bajado.jpg");
+		ftp.bajarFichero("IMAGEs.jpg", "bajado.jpg");//suelta error
+		ftp.eliminarFichero("IMAGEs.jpg"); // suelta error
+		ftp.cambiarDirectorioDeTrabajo("/");
+		ftp.crearCarpeta("AdrianPajaresPeso");
+		ftp.eliminarCarpeta("AdrianPajaresPeso");
+		ftp.eliminarCarpeta("AdrianPajaresPeso");// suelta error
+		ftp.disconectFromFTPServer();
+
 	}
-	
+
 }
